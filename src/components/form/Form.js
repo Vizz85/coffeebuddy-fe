@@ -28,6 +28,7 @@ export default class Form extends Component {
         .then(data => {
           if (data.confirmed) {
             this.setState({confirmed: true})
+            localStorage.removeItem('coffeebuddy_url')
             clearInterval(interval)
           }
         })
