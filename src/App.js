@@ -1,13 +1,22 @@
+import {BrowserRouter as Router, Link, Route, Switch} from "react-router-dom";
 import Form from './components/form/Form'
+import Confirm from "./components/form/Confirm";
 import './App.css';
 
 function App() {
   return (
-    <div className="App">
+    <Router>
       <div className="container">
-        <Form />
+        <Switch>
+          <Route path="/:coffee_style/:hash" component={Confirm} />
+
+          <Route path="/">
+            <Form />
+          </Route>
+
+        </Switch>
       </div>
-    </div>
+    </Router>
   );
 }
 

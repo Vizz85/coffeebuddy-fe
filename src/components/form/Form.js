@@ -11,11 +11,27 @@ export default class Form extends Component {
         name: '',
         coffee: '',
         milk: ''
-      }
+      },
+      url: localStorage.getItem('coffeebuddy_url') || '',
+      hash: '',
+      confirmed: false,
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
+  }
+
+  pollResponse(hash) {
+    let interval = setInterval(() => {
+      fetch(`http://localhost:4000/query/${hash}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.confirmed) {
+            this.setState({confirmed: true})
+            clearInterval(interval)
+          }
+        })
+    }, 1000)
   }
 
   handleSubmit(event) {
@@ -35,6 +51,10 @@ export default class Form extends Component {
       .then(response => response.json())
       .then(data => {
         console.log(data)
+        localStorage.setItem('coffeebuddy_url', data.url);
+        localStorage.setItem('coffeebuddy_hash', data.hash);
+        this.setState({url: data.url, hash: data.hash})
+        this.pollResponse(data.hash);
       })
   }
 
@@ -50,56 +70,73 @@ export default class Form extends Component {
   }
 
   render() {
-    let {order} = this.state
+    let {order, url, confirmed} = this.state
 
-    return (
-      <form action="" onSubmit={this.handleSubmit}>
-
-        <Input
-          title={'Enter your name'}
-          type={'text'}
-          name={'name'}
-          value={order.name}
-          handleChange={this.handleChange}
-        />
-
-        <Select
-            title={'Select your coffee'}
-            name={'coffee'}
-            options={[{
-              id: 'espresso',
-              value: 'Espresso'
-            },{
-              id: 'cappuccino',
-              value: 'Cappuccino'
-            },{
-              id: 'flat-white',
-              value: 'Flat White'
-            },]}
-            value={order.coffee}
+    if (confirmed) {
+      return (
+        <div>
+          <h1>Coffee has been confirmed!</h1>
+        </div>
+      );
+    } else if (url) {
+      return (
+        <div>
+          <h1>Waiting for response</h1>
+          <h2>Your url: <strong>{url}</strong></h2>
+        </div>
+      );
+    } else {
+      return (
+        <form action="" onSubmit={this.handleSubmit}>
+  
+          <Input
+            title={'Enter your name'}
+            type={'text'}
+            name={'name'}
+            value={order.name}
             handleChange={this.handleChange}
-        />
+          />
+  
+          <Select
+              title={'Select your coffee'}
+              name={'coffee'}
+              options={[{
+                id: 'espresso',
+                value: 'Espresso'
+              },{
+                id: 'cappuccino',
+                value: 'Cappuccino'
+              },{
+                id: 'flat-white',
+                value: 'Flat White'
+              },]}
+              value={order.coffee}
+              handleChange={this.handleChange}
+          />
+  
+          <Select
+              title={'Select milk type'}
+              name={'milk'}
+              options={[{
+                id: 'dairy',
+                value: 'dairy'
+              },{
+                id: 'soy-milk',
+                value: 'soy milk'
+              },{
+                id: 'oat-milk',
+                value: 'oat milk'
+              },]}
+              value={order.milk}
+              handleChange={this.handleChange}
+          />
+  
+          <button type="submit" className="btn btn-primary">Submit</button>
+  
+        </form>
+      );
+    }
 
-        <Select
-            title={'Select milk type'}
-            name={'milk'}
-            options={[{
-              id: 'dairy',
-              value: 'dairy'
-            },{
-              id: 'soy-milk',
-              value: 'soy milk'
-            },{
-              id: 'oat-milk',
-              value: 'oat milk'
-            },]}
-            value={order.milk}
-            handleChange={this.handleChange}
-        />
-
-        <button type="submit" className="btn btn-primary">Submit</button>
-
-      </form>
-    );
+    
   }
 }
