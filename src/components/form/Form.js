@@ -13,9 +13,13 @@ export default class Form extends Component {
         milk: ''
       },
       url: localStorage.getItem('coffeebuddy_url') || '',
-      hash: '',
+      hash: localStorage.getItem('coffeebuddy_hash') || '',
       confirmed: false,
     };
+
+    if (this.state.hash) {
+      this.pollResponse(this.state.hash)
+    }
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -29,6 +33,7 @@ export default class Form extends Component {
           if (data.confirmed) {
             this.setState({confirmed: true})
             localStorage.removeItem('coffeebuddy_url')
+            localStorage.removeItem('coffeebuddy_hash')
             clearInterval(interval)
           }
         })
